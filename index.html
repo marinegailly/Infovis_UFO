@@ -8,7 +8,7 @@
 			/* CSS code for the element that has the id map */
 
 			#map { 
-				width: 1000px;   /* Dimensions of the map element */
+				width: 600px;   /* Dimensions of the map element */
 				height: 600px;
 			}
 
@@ -49,44 +49,37 @@
 	// An API access token is required to use the API. Replace with your own (see how to get an API token in the slides). You can request your own on the Mapbox website
 	mapboxgl.accessToken = "pk.eyJ1IjoiYWNsYXJpbnZhbCIsImEiOiJjam1wY25sNGsxOXZqM2twa2hyaG0wbDF6In0.40Fo_wy_iUZGNL5j_CIXdA";
 
-    function getGeoJSON(points, first, second){
+    function getGeoJSON(points){
 
         var features = Array();
 
         for(var i = 0; i < points.length; i++){
 
             // For every point, a feature is created and added to the array features
-			var without_hour = points[i].datetime.split(" ")[0]
-			var year = without_hour.split("/")[2]
-			var without_date = points[i].datetime.split(" ")[1]
-			
 
-			if(year >= first && year <= second && points[i].country== 'us'){
-				
-				console.log(year)
-				
-				var point = {type : "Feature",
-								geometry : {   // The geometry for a point contains the type (which is Point) and the coordinates
-									type : "Point",
-									coordinates : [points[i].longitude, points[i].latitude]   // The longitude and latitude must be specified longitude first, which is a little confusing as latitude usually comes first
-								},
-								properties : { // The properties contain any other information on the point
-								date : points[i].datetime ,
-								country : points[i].country,
-								comment : points[i].comments,
+            var point = {type : "Feature",
+                            geometry : {   // The geometry for a point contains the type (which is Point) and the coordinates
+                                type : "Point",
+                                coordinates : [points[i].longitude, points[i].latitude]   // The longitude and latitude must be specified longitude first, which is a little confusing as latitude usually comes first
+                            },
+                            properties : { // The properties contain any other information on the point
+							date : points[i].datetime ,
+							country : points[i].country="us",
+							
+							
+							
 
-								
-								}
-						}
-			
-			
-			features.push(point);
+                            
+                            }
+                        }
+
+            features.push(point);
+    
   
         }
 
         return features;
 	}
-};
 
     
 
@@ -105,16 +98,13 @@
 		position: "top-left"}   // The controls appear at the top left
 	));	
 	
-	
 
     d3.json("ufo_500.json", function(data){   // The code in the function is executed only when the data is loaded. All code requiring that the data is fully loaded shoud come here
 
         console.log(data);
         map.on("load", function(){
 
-
-			
-            var featurecollection = {type : "FeatureCollection", features : getGeoJSON(data, first, second)};
+            var featurecollection = {type : "FeatureCollection", features : getGeoJSON(data)};
 
             // A layer holding the visual elements is added to the map
 
@@ -135,24 +125,21 @@
                 }
 
             });
-			
 
         });
 
-	});	
-
-
+    });
 
 	var first, second, result;
 
-first  = prompt("Pour l'intervalle de date ; Entrez la première date : ");
+first  = prompt('Entrez la premier date : ');
 second = prompt('Entrez la seconde date: ');
 result =  'Voici les données de ' + first + ' à '+ second;
 
 alert(result );
 
 
-
+	 
 
 //pour retourner des données 
 d3.json("ufo_500.json", function(data) {
@@ -166,7 +153,5 @@ d3.json("ufo_500.json", function(data) {
         });
 
 });
-
-
 
 </script>
