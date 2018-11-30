@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>MAP</title>   <!-- Set the title of the page here -->
+		<style type="text/css">   /* The CSS code goes here */
+
+			/* CSS code for the element that has the id map */
+
+			#map { 
+				width: 1000px;   /* Dimensions of the map element */
+				height: 600px;
+			}
+
+			/* CSS code for the elements that have the class dot */
+
+			.dot {
+				cursor: pointer;   /* Changes the look of the cursor when it hovers the element */
+				fill: #0082a3;   /* Color */
+				fill-opacity: 0.6;   /* Transparency, from 0 (invisible) to 1 (opaque) */
+				stroke: #004d60;   /* Border color */
+				stroke-width: 1;   /* Border width in pixels */
+			}
+
+			/* CSS code for the element that has the id points_container */
+
+			#points_container {
+				position: absolute;
+				width: 100%;   /* Width of the element is 100% of the width of its parent */
+				height: 100%;   /* Height of the element is 100% of the width of its parent */
+			}
+
+		</style>
+		<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.42.2/mapbox-gl.css'f rel='stylesheet'></link>   <!-- Import of the styles from Mapbox -->
+	</head>
+	<body>
+
+		<div id="map"></div>   <!-- Working example - Map with points -->
+		
+		
+		
+		
+	</body>
+</html>
+<script src="https://d3js.org/d3.v3.min.js"></script>   <!-- d3.js import -->
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.42.2/mapbox-gl.js'></script>   <!-- Mapbox library import -->
+<script type="text/javascript">
+
+	// An API access token is required to use the API. Replace with your own (see how to get an API token in the slides). You can request your own on the Mapbox website
+	mapboxgl.accessToken = "pk.eyJ1IjoiYWNsYXJpbnZhbCIsImEiOiJjam1wY25sNGsxOXZqM2twa2hyaG0wbDF6In0.40Fo_wy_iUZGNL5j_CIXdA";
+
+    function getGeoJSON(points, first, second){
+
+        var features = Array();
+
+        for(var i = 0; i < points.length; i++){
+
+            // For every point, a feature is created and added to the array features
+			var without_hour = points[i].datetime.split(" ")[0]
+			var year = without_hour.split("/")[2]
+			var without_date = points[i].datetime.split(" ")[1]
+			
+
+			if(year >= first && year <= second && points[i].country== 'us'){
+				
+				console.log(year)
+				
+				var point = {type : "Feature",
+								geometry : {   // The geometry for a point contains the type (which is Point) and the coordinates
+									type : "Point",
+									coordinates : [points[i].longitude, points[i].latitude]   // The longitude and latitude must be specified longitude first, which is a little confusing as latitude usually comes first
+								},
+								properties : { // The properties contain any other information on the point
+								date : points[i].datetime ,
+								country : points[i].country,
+								comment : points[i].comments,
+
+								
+								}
+						}
+			
+			
+			features.push(point);
+  
+        }
+
+        return features;
+	}
+};
+
+    
+
+	// A new map is created
+
+	var map = new mapboxgl.Map({
+				container: "map",   // ID of the element that contains the map
+				style: "mapbox://styles/mapbox/dark-v9",   // Type of map (other styles include basic-v9, streets-v9, light-v9, satellite-v9 and bright-v9, try them out to see which one is best for your map)
+				center: [-99, 39],   // Coordinates of the center of the map [longitude, latitude]
+				zoom: 3 // Initial zoom level (1 is the furthest zoom, it shows the whole world)
+	})
+
+	// Add zoom and rotation controls to the map
+	
+	map.addControl(new mapboxgl.NavigationControl({
+		position: "top-left"}   // The controls appear at the top left
+	));	
+	
+	
+
+    d3.json("ufo_500.json", function(data){   // The code in the function is executed only when the data is loaded. All code requiring that the data is fully loaded shoud come here
+
+        console.log(data);
+        map.on("load", function(){
+
+
+			
+            var featurecollection = {type : "FeatureCollection", features : getGeoJSON(data, first, second)};
+
+            // A layer holding the visual elements is added to the map
+
+            map.addLayer({
+                id: "ufo_500.json",   // Layer id
+                type: "circle",   // Type of the visual elements representing the museums
+                source: {   // Data
+                    type: "geojson",   // Type of data
+                    data: featurecollection 
+					  // Variable holding the feature collection
+                },
+                paint: {   // Style of the visual elements (circles)
+                    "circle-radius": 3,   // Radius
+                    "circle-color": "#6ac70b",   // Fill color
+                    "circle-opacity": 0.6,   // Opacity (0 is transparent, 1 is opaque)
+                    "circle-stroke-width": 1,   // Width of the circles border
+                    "circle-stroke-color": "#004d60"   // Color of the circles border
+                }
+
+            });
+			
+
+        });
+
+	});	
+
+
+
+	var first, second, result;
+
+first  = prompt("Pour l'intervalle de date ; Entrez la première date : ");
+second = prompt('Entrez la seconde date: ');
+result =  'Voici les données de ' + first + ' à '+ second;
+
+alert(result );
+
+
+
+
+//pour retourner des données 
+d3.json("ufo_500.json", function(data) {
+    d3.select("body")
+        .selectAll("us")
+        .data(data)
+        .enter()
+        .append("p")
+        .text(function(d) {
+            //return d.datetime;
+        });
+
+});
+
+
+
+</script>
